@@ -57,7 +57,6 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder>{
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(),ThirdActivity.class);
                 intent.putExtra("tagPosition",position);
-                intent.putExtra("tagTitle",mTagList.get(position).getContent());
                 view.getContext().startActivity(intent);
             }
         });

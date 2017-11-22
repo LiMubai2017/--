@@ -15,6 +15,7 @@ import org.litepal.crud.DataSupport;
 import org.litepal.tablemanager.Connector;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
@@ -41,7 +42,11 @@ public class MainActivity extends AppCompatActivity{
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this,SecondActivity.class);
+                Tag tag = new Tag("");
+                tagList.add(tag);
+                tag.save();
+                Intent intent = new Intent(MainActivity.this,ThirdActivity.class);
+                intent.putExtra("tagPosition",tagList.size()-1);
                 startActivity(intent);
             }
         });
