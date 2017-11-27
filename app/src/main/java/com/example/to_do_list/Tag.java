@@ -14,7 +14,6 @@ public class Tag extends DataSupport{
     private boolean isNotified;
 
 
-
     public void set(int year_begin,int year_end,int month_begin,int month_end,int day_begin,int day_end,int hour_begin,int hour_end,int minute_begin,int minute_end) {
         this.year_begin = year_begin;this.year_end = year_end;this.month_begin = month_begin;this.month_end = month_end;this.minute_end = minute_end;
         this.day_begin = day_begin;this.day_end = day_end;this.hour_begin = hour_begin;this.hour_end = hour_end;this.minute_begin = minute_begin;

@@ -61,7 +61,7 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         notifyIntent = new Intent(allContext,NotifyActivity.class);
         notifyIntent.putExtra("tagPosition",position);
         pendingIntent = PendingIntent.getActivity(allContext,position,notifyIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-        tag = DataSupport.findAll(Tag.class).get(position);
+        tag = MainActivity.tagList.get(position);
         alarmManager = (AlarmManager) allContext.getSystemService(Context.ALARM_SERVICE);
         year_begin=tag.getYear_begin();month_begin=tag.getMonth_begin();day_begin=tag.getDay_begin();
         hour_begin=tag.getHour_begin();minute_begin=tag.getMinute_begin();
@@ -78,8 +78,7 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
             public void onCheckedChanged(SwitchButton view, boolean isChecked) {
                 notifyIntent.putExtra("tagPosition", position);
                 if(isChecked) {
-                    tag.setNotified(true);
-                    tag.save();
+                    MainActivity.tagList.get(position).setNotified(true);
                     Calendar notifyCalendar = Calendar.getInstance();
                     notifyCalendar.set(year_begin,month_begin,day_begin,hour_begin,minute_begin);
                     if(Build.VERSION.SDK_INT>=19) {
@@ -90,8 +89,7 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
                     Toast.makeText(ThirdActivity.this,"将在"+year_begin+"-"+(month_begin+1)+"-"+day_begin+"   "+
                             hour_begin+":"+minute_begin+"提醒您",Toast.LENGTH_SHORT).show();
                 } else {
-                    tag.setNotified(false);
-                    tag.save();
+                    MainActivity.tagList.get(position).setNotified(false);
                     alarmManager.cancel(pendingIntent);
                     Toast.makeText(ThirdActivity.this,"提醒取消",Toast.LENGTH_SHORT).show();
                 }
@@ -163,12 +161,14 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         if("".equals(newConten)==true) mode=-1;
         else
         if(tag.getContent().equals(newConten)==false) mode=1;
-        List<Tag> tagList = DataSupport.findAll(Tag.class);
-        if(mode==-1) tagList.get(position).delete();
+
+        if(mode==-1){
+            MainActivity.tagList.get(position).delete();
+            MainActivity.tagList.remove(position);
+        }
         else
         {
-            if(mode==1) tag.setContent(newConten);
-            tag.save();
+            if(mode==1) MainActivity.tagList.get(position).setContent(newConten);
         }
     }
 }
