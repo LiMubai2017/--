@@ -1,6 +1,7 @@
 package com.example.to_do_list;
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
@@ -36,26 +37,31 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
     int position;
     EditText editText;
     int mode=0;
-    TextView beginningTime_view;
-    TextView deadLine_view;
-    int year_begin,year_end,month_begin,month_end,day_begin,day_end,hour_begin,hour_end,minute_begin,minute_end;
+    TextView beginningTime,beginningDate,endDate,endTime,priority_view;
+    int priority,year_begin,year_end,month_begin,month_end,day_begin,day_end,hour_begin,hour_end,minute_begin,minute_end;
     com.suke.widget.SwitchButton notifyButton;
     AlarmManager alarmManager;
     private Context allContext;
     Intent notifyIntent ;
     PendingIntent pendingIntent ;
+    String[] priorityChoics={"低","较低","一般","较高","高"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
         allContext = getApplicationContext();
         setContentView(R.layout.activity_third);
         editText = findViewById(R.id.edit_text);
         Button button_delete = findViewById(R.id.button_delete);
         notifyButton = findViewById(R.id.notify_button);
-        beginningTime_view = (TextView) findViewById(R.id.beginningname_view);
-        deadLine_view = (TextView) findViewById(R.id.deadline_view);
+        beginningDate = (TextView) findViewById(R.id.beginningDate_view);
+        beginningTime=(TextView) findViewById(R.id.beginningTime_view);
+        endDate=(TextView) findViewById(R.id.endDate_view);
+        endTime=(TextView) findViewById(R.id.endTime_view);
+        priority_view=(TextView) findViewById(R.id.priority_view);
+        android.support.v7.widget.Toolbar toobal2 = findViewById(R.id.toolbar2);
+        setSupportActionBar(toobal2);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
         position = intent.getIntExtra("tagPosition",0);
         notifyIntent = new Intent(allContext,NotifyActivity.class);
@@ -63,15 +69,19 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         pendingIntent = PendingIntent.getActivity(allContext,position,notifyIntent,PendingIntent.FLAG_UPDATE_CURRENT);
         tag = MainActivity.tagList.get(position);
         alarmManager = (AlarmManager) allContext.getSystemService(Context.ALARM_SERVICE);
+        priority=tag.getPriority();
         year_begin=tag.getYear_begin();month_begin=tag.getMonth_begin();day_begin=tag.getDay_begin();
         hour_begin=tag.getHour_begin();minute_begin=tag.getMinute_begin();
         year_end=tag.getYear_end();month_end=tag.getMonth_end();day_end=tag.getDay_end();
         hour_end=tag.getHour_end();minute_end=tag.getMinute_end();
         editText.setText(tag.getContent());
         if(tag.isNotified()) notifyButton.setChecked(true);
-        updateTime();
-        beginningTime_view.setOnClickListener(this);
-        deadLine_view.setOnClickListener(this);
+        updateAttachment();
+        beginningTime.setOnClickListener(this);
+        beginningDate.setOnClickListener(this);
+        endDate.setOnClickListener(this);
+        endTime.setOnClickListener(this);
+        priority_view.setOnClickListener(this);
         button_delete.setOnClickListener(this);
         notifyButton.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
@@ -97,13 +107,16 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         });
     }
 
-    public void updateTime() {
-        beginningTime_view.setText(
-                "开始时间  "+year_begin+"-"+(month_begin+1)+"-"+day_begin+"   "+
-                        hour_begin+":"+minute_begin);
-        deadLine_view.setText(
-                "截止时间  "+year_end+"-"+(month_end+1)+"-"+day_end +"   "+
-                        hour_end+":"+minute_end);
+    public void updateAttachment() {
+        beginningDate.setText(
+                "开始时间  "+year_begin+"-"+(month_begin+1)+"-"+day_begin
+        );
+
+        beginningTime.setText(
+                "   "+ hour_begin+":"+minute_begin);
+        endDate.setText("结束时间  "+year_end+"-"+(month_end+1)+"-"+day_end);
+        endTime.setText("   "+hour_end+":"+minute_end);
+        priority_view.setText("优先级： "+priorityChoics[priority]);
         tag.set(year_begin,year_end,month_begin,month_end,day_begin,day_end,hour_begin,hour_end,minute_begin,minute_end);
         tag.save();
     }
@@ -115,15 +128,17 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
                 mode=-1;
                 finish();
                 break;
-            case R.id.beginningname_view:
+            case R.id.beginningTime_view:
                 new TimePickerDialog(ThirdActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int i, int i1) {
                         hour_begin=i;
                         minute_begin=i1;
-                        updateTime();
+                        updateAttachment();
                     }
                 },hour_begin,minute_begin,true).show();
+                break;
+            case R.id.beginningDate_view:
                 new DatePickerDialog(ThirdActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
@@ -133,15 +148,17 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
                     }
                 },year_begin,month_begin,day_begin).show();
                 break;
-            case R.id.deadline_view:
+            case R.id.endDate_view:
                 new TimePickerDialog(ThirdActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int i, int i1) {
                         hour_end=i;
                         minute_end=i1;
-                        updateTime();
+                        updateAttachment();
                     }
                 },hour_end,minute_end,true).show();
+                break;
+            case R.id.endTime_view:
                 new DatePickerDialog(ThirdActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
@@ -151,6 +168,24 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
                     }
                 },year_end,month_end,day_end).show();
                 break;
+            case R.id.priority_view:
+                AlertDialog.Builder priorityChoodeDialog = new AlertDialog.Builder(ThirdActivity.this);
+                priorityChoodeDialog.setTitle("标签优先级");
+                priorityChoodeDialog.setSingleChoiceItems(priorityChoics,priority,(dialog,which)->{
+                    if(which!=-1) priority=which;
+                });
+                priorityChoodeDialog.setPositiveButton("确定",(dialog,which)->{
+                        tag.setPriority(priority);
+                        tag.save();
+                        updateAttachment();
+                });
+                priorityChoodeDialog.show();
+                break;
+            case R.id.home:
+                Log.d("ThirdActivity.this","test");
+                finish();
+                break;
+
         }
     }
 

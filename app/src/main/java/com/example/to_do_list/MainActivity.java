@@ -1,6 +1,7 @@
 package com.example.to_do_list;
 
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import org.litepal.crud.DataSupport;
 import org.litepal.tablemanager.Connector;
@@ -32,50 +34,35 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getSupportActionBar().hide();
+        android.support.v7.widget.Toolbar toobal = findViewById(R.id.toolbar);
+        setSupportActionBar(toobal);
         Connector.getDatabase();
         initTags();
         recyclerView = (RecyclerView)findViewById(R.id.recycler_view);
-        //LinearLayoutManager manager = new LinearLayoutManager(this);
         StaggeredGridLayoutManager manager = new
                 StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(manager);
         adapter = new TagAdapter(tagList);
         recyclerView.setAdapter(adapter);
-        Button buttonAdd = findViewById(R.id.button_add);
-        buttonAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Tag tag = new Tag("");
-                tagList.add(tag);
-                tag.save();
-                Intent intent = new Intent(MainActivity.this,ThirdActivity.class);
-                intent.putExtra("tagPosition",tagList.size()-1);
-                startActivity(intent);
-            }
-        });
-        findViewById(R.id.beginning_rank_button).setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                rankMode = 1;
-                sort();
-            }
-        });
-        findViewById(R.id.deadline_rank_button).setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                rankMode = 2;
-                sort();
-            }
+        FloatingActionButton floatingActionButton = findViewById(R.id.fab);
+        floatingActionButton.setOnClickListener((v)->
+        {
+            Tag tag = new Tag("");
+            tagList.add(tag);
+            tag.save();
+            Intent intent = new Intent(MainActivity.this,ThirdActivity.class);
+            intent.putExtra("tagPosition",tagList.size()-1);
+            startActivity(intent);
         });
     }
 
     private void sort() {
         if(rankMode == 1) Collections.sort(tagList,new BeginningCompare());
         if(rankMode == 2) Collections.sort(tagList,new DeadlineCompare());
+        if(rankMode == 3) Collections.sort(tagList,new PriorityCompare());
         adapter.notifyDataSetChanged();
     }
-/*
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.rank_options,menu);
@@ -86,15 +73,21 @@ public class MainActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.beginning_rank :
+                rankMode = 1;
+                sort();
                 break ;
             case R.id.deadline_rank :
+                rankMode = 2;
+                sort();
                 break ;
             case R.id.priority_rank :
+                rankMode = 3;
+                sort();
                 break ;
         }
         return true;
     }
-*/
+
     @Override
     protected void onResume() {
         super.onResume();

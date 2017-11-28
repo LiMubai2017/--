@@ -52,10 +52,13 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder>{
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
+        String[] priority = {"低","较低","一般","较高","高"};
         Tag tag = mTagList.get(position);
         holder.tagContent.setText(tag.getContent());
         if(MainActivity.rankMode == 1) holder.attachment.setText("Begin: "+tag.getYear_begin()+"-"+(tag.getMonth_begin()+1)+"-"+tag.getDay_begin());
         if(MainActivity.rankMode == 2) holder.attachment.setText("End: "+tag.getYear_end()+"-"+(tag.getMonth_end()+1)+"-"+tag.getDay_end());
+        if(MainActivity.rankMode == 3) holder.attachment.setText("优先级 "+priority[tag.getPriority()]);
+
         holder.tagView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

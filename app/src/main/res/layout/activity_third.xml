@@ -5,6 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar2"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    />
+
     <EditText
         android:id="@+id/edit_text"
         android:layout_width="match_parent"
@@ -22,16 +30,47 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/beginningname_view"
-            android:layout_width="match_parent"
+            android:id="@+id/priority_view"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"/>
+            android:layout_marginLeft="15dp"
+            android:textSize="15dp"/>
 
-        <TextView
-            android:id="@+id/deadline_view"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"/>
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/beginningDate_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_marginLeft="15dp"
+                android:textSize="15dp"/>
+
+            <TextView
+                android:id="@+id/beginningTime_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/endDate_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_marginLeft="15dp"
+                android:textSize="15dp"/>
+
+            <TextView
+                android:id="@+id/endTime_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -42,11 +81,19 @@
 
         <Button
             android:id="@+id/button_delete"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_gravity="right"
-            android:text="删除" />
+            android:background="@drawable/dustbin"
+            android:layout_marginLeft="100dp"/>
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15dp"
+            android:text=" 提醒 "
+            />
 
         <com.suke.widget.SwitchButton
             android:id="@+id/notify_button"

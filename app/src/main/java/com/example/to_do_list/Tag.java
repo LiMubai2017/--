@@ -12,7 +12,7 @@ public class Tag extends DataSupport{
     private String content;
     private   int year_begin,year_end,month_begin,month_end,day_begin,day_end,hour_begin,hour_end,minute_begin,minute_end;
     private boolean isNotified;
-
+    private int priority;
 
     public void set(int year_begin,int year_end,int month_begin,int month_end,int day_begin,int day_end,int hour_begin,int hour_end,int minute_begin,int minute_end) {
         this.year_begin = year_begin;this.year_end = year_end;this.month_begin = month_begin;this.month_end = month_end;this.minute_end = minute_end;
@@ -23,6 +23,7 @@ public class Tag extends DataSupport{
         this.content = content;
         Calendar calendar = Calendar.getInstance();
         year_end=year_begin = calendar.get(Calendar.YEAR);
+        priority=2;
         month_begin=month_end = calendar.get(Calendar.MONTH);
         day_end=day_begin=calendar.get(Calendar.DAY_OF_MONTH);
         isNotified=false;
@@ -82,5 +83,13 @@ public class Tag extends DataSupport{
 
     public String getContent() {
         return content;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 }

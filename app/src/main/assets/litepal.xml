@@ -2,7 +2,7 @@
 <litepal>
     <dbname value="TagList"></dbname>
 
-    <version value="6"></version>
+    <version value="8"></version>
 
     <list>
         <mapping class="com.example.to_do_list.Tag"></mapping>
