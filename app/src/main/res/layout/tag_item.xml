@@ -13,19 +13,31 @@
 
         >
 
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
 
-        />
-
-    <TextView
-        android:id="@+id/tag_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginTop="5dp"
-        android:textSize="15dp"/>
+        <com.ms.square.android.expandabletextview.ExpandableTextView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:expandableTextView="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/tag_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            expandableTextView:maxCollapsedLines="4"
+            expandableTextView:animDuration="200">
+            <TextView
+                android:id="@id/expandable_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:textSize="16sp"
+                android:textColor="#666666" />
+            <ImageButton
+                android:id="@id/expand_collapse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:layout_gravity="right|bottom"
+                android:background="@android:color/transparent"/>
+        </com.ms.square.android.expandabletextview.ExpandableTextView>
 
 
     </LinearLayout>

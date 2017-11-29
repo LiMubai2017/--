@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
+import com.ms.square.android.expandabletextview.ExpandableTextView;
+
 import java.util.List;
 
 /**
@@ -21,14 +23,16 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder>{
     ViewHolder holder;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tagContent;
+        //TextView tagContent;
+        ExpandableTextView tagContent;
         View tagView;
         TextView attachment;
 
         public ViewHolder(View itemView) {
             super(itemView);
             tagView=itemView;
-            tagContent = (TextView) itemView.findViewById(R.id.tag_content);
+            //tagContent = (TextView) itemView.findViewById(R.id.tag_content);
+            tagContent = (ExpandableTextView) tagView.findViewById(R.id.tag_content);
             attachment = (TextView) itemView.findViewById(R.id.tag_attachment);
         }
     }
