@@ -3,6 +3,7 @@ package com.example.to_do_list;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
@@ -10,14 +11,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -52,7 +60,7 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         allContext = getApplicationContext();
         setContentView(R.layout.activity_third);
         editText = findViewById(R.id.edit_text);
-        Button button_delete = findViewById(R.id.button_delete);
+        ImageButton button_delete = findViewById(R.id.button_delete);
         notifyButton = findViewById(R.id.notify_button);
         beginningDate = (TextView) findViewById(R.id.beginningDate_view);
         beginningTime=(TextView) findViewById(R.id.beginningTime_view);
@@ -122,11 +130,24 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break ;
+        }
+        return true;
+    }
+
+    @Override
     public void onClick(View view) {
         switch(view.getId()) {
-            case R.id.button_delete :
+            case R.id.button_confirmdelete:
                 mode=-1;
                 finish();
+                break;
+            case R.id.button_delete :
+                showDeleteDialog();
                 break;
             case R.id.beginningTime_view:
                 new TimePickerDialog(ThirdActivity.this, new TimePickerDialog.OnTimeSetListener() {
@@ -181,12 +202,24 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
                 });
                 priorityChoodeDialog.show();
                 break;
-            case R.id.home:
-                Log.d("ThirdActivity.this","test");
-                finish();
-                break;
-
         }
+    }
+
+    private void showDeleteDialog() {
+        Dialog dialog = new Dialog(this);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_delete,null);
+        dialogView.findViewById(R.id.button_confirmdelete).setOnClickListener(this);
+        dialogView.findViewById(R.id.button_cancel).setOnClickListener((v)->{
+            dialog.hide();
+        });
+        dialog.setContentView(dialogView);
+        Window dialogWindow = dialog.getWindow();
+        dialogWindow.setGravity(Gravity.BOTTOM);
+        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+        lp.y=0;
+        lp.width=WindowManager.LayoutParams.MATCH_PARENT;
+        dialogWindow.setAttributes(lp);
+        dialog.show();;
     }
 
     @Override
