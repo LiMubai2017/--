@@ -4,9 +4,11 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +29,7 @@ public class MainActivity extends AppCompatActivity{
 
     public static List<Tag> tagList = new ArrayList<Tag>();
     private TagAdapter adapter;
-    public static int rankMode = 1;
+    public static int rankMode = 3;
     RecyclerView recyclerView;
 
     @Override
@@ -44,6 +46,52 @@ public class MainActivity extends AppCompatActivity{
         recyclerView.setLayoutManager(manager);
         adapter = new TagAdapter(tagList);
         recyclerView.setAdapter(adapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
+            @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                final int dragFlags;
+                final int swipeFlags;
+
+                if (recyclerView.getLayoutManager() instanceof StaggeredGridLayoutManager) {
+                    dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+                    swipeFlags = 0;
+                } else {
+                    dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                    swipeFlags = 0;
+                }
+                return makeMovementFlags(dragFlags, swipeFlags);
+            }
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                int fromPosition = viewHolder.getAdapterPosition();//得到拖动ViewHolder的position
+                int toPosition = target.getAdapterPosition();//得到目标ViewHolder的position
+                if (fromPosition < toPosition) {
+                    for (int i = fromPosition; i < toPosition; i++) {
+                        Collections.swap(tagList, i, i + 1);
+                        int temp = tagList.get(i).getPriority();
+                        tagList.get(i).setPriority(tagList.get(i+1).getPriority());
+                        tagList.get(i+1).setPriority(temp);
+                    }
+                } else {
+                    for (int i = fromPosition; i > toPosition; i--) {
+                        Collections.swap(tagList, i, i - 1);
+                        int temp = tagList.get(i).getPriority();
+                        tagList.get(i).setPriority(tagList.get(i-1).getPriority());
+                        tagList.get(i-1).setPriority(temp);
+                    }
+                    rankMode=3;
+                }
+                adapter.notifyItemMoved(fromPosition, toPosition);
+                return true;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+
+            }
+        });
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
         FloatingActionButton floatingActionButton = findViewById(R.id.fab);
         floatingActionButton.setOnClickListener((v)->
         {

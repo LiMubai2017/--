@@ -170,16 +170,6 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
                 },year_begin,month_begin,day_begin).show();
                 break;
             case R.id.endDate_view:
-                new TimePickerDialog(ThirdActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                        hour_end=i;
-                        minute_end=i1;
-                        updateAttachment();
-                    }
-                },hour_end,minute_end,true).show();
-                break;
-            case R.id.endTime_view:
                 new DatePickerDialog(ThirdActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
@@ -188,6 +178,16 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
                         day_end=i2;
                     }
                 },year_end,month_end,day_end).show();
+                break;
+            case R.id.endTime_view:
+                new TimePickerDialog(ThirdActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int i, int i1) {
+                        hour_end=i;
+                        minute_end=i1;
+                        updateAttachment();
+                    }
+                },hour_end,minute_end,true).show();
                 break;
             case R.id.priority_view:
                 AlertDialog.Builder priorityChoodeDialog = new AlertDialog.Builder(ThirdActivity.this);

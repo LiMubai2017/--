@@ -6,6 +6,7 @@
         <item name="colorPrimary">#FFFFC107</item>
         <item name="colorPrimaryDark">#FFFFC107</item>
         <item name="colorAccent">#ffc107</item>
+        <item name="android:windowBackground">@color/windowBackground</item>
 
     </style>
 
