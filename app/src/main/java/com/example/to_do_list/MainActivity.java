@@ -4,26 +4,28 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
-import android.widget.Toolbar;
+
+import com.example.to_do_list.db.Tag;
+import com.example.to_do_list.db.Weather;
+import com.example.to_do_list.util.Utility;
 
 import org.litepal.crud.DataSupport;
 import org.litepal.tablemanager.Connector;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity{
         if(tagList.size()==0) {
             Tag tag = new Tag("欢迎使用木白便签");
             tagList.add(tag);
-            tag.save();
         }
     }
+
 }

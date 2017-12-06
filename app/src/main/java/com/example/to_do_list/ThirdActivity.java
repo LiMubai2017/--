@@ -5,16 +5,14 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,20 +20,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.to_do_list.db.Tag;
+import com.example.to_do_list.db.Weather;
+import com.example.to_do_list.util.Utility;
 import com.suke.widget.SwitchButton;
 
-import org.litepal.crud.DataSupport;
-
+import java.io.IOException;
 import java.util.Calendar;
-import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
 
@@ -53,6 +56,8 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
     Intent notifyIntent ;
     PendingIntent pendingIntent ;
     String[] priorityChoics={"低","较低","一般","较高","高"};
+    String weatherAddress;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +73,9 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         endTime=(TextView) findViewById(R.id.endTime_view);
         priority_view=(TextView) findViewById(R.id.priority_view);
         android.support.v7.widget.Toolbar toobal2 = findViewById(R.id.toolbar2);
+        progressDialog = new ProgressDialog(ThirdActivity.this);
+        progressDialog.setTitle("获取当地天气");
+        progressDialog.setMessage("全力加载中");
         setSupportActionBar(toobal2);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
@@ -85,12 +93,15 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         editText.setText(tag.getContent());
         if(tag.isNotified()) notifyButton.setChecked(true);
         updateAttachment();
+        if(tag.isShowTemperature()) changeFragment(tag.getTemperature());
+        else changeFragment(null);
         beginningTime.setOnClickListener(this);
         beginningDate.setOnClickListener(this);
         endDate.setOnClickListener(this);
         endTime.setOnClickListener(this);
         priority_view.setOnClickListener(this);
         button_delete.setOnClickListener(this);
+        findViewById(R.id.button_weather).setOnClickListener(this);
         notifyButton.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(SwitchButton view, boolean isChecked) {
@@ -126,8 +137,52 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         endTime.setText("   "+hour_end+":"+minute_end);
         priority_view.setText("优先级： "+priorityChoics[priority]);
         tag.set(year_begin,year_end,month_begin,month_end,day_begin,day_end,hour_begin,hour_end,minute_begin,minute_end);
-        tag.save();
     }
+
+    private void changeFragment(String temperature) {
+        LinearLayout fragmentLayout = findViewById(R.id.fragment_layout);
+        if(temperature == null) {
+            if(fragmentLayout.getVisibility()==View.VISIBLE)
+            fragmentLayout.setVisibility(View.GONE);
+            Log.d("test","隐藏碎片");
+            return ;
+        }
+        if(fragmentLayout.getVisibility()==View.GONE) {
+            fragmentLayout.setVisibility(View.VISIBLE);
+            Log.d("test","显示碎片");
+        }
+        AttachFragment weatherFragment = (AttachFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
+        weatherFragment.changeWeather(temperature);
+        Log.d("test","更新温度");
+    }
+
+    private void getWeather(){
+        String weatherUrl = "http://guolin.tech/api/weather?cityid=CN101200102&key=59c732c13e9141a79deec24c07a10a7e";
+        Utility.sendOkHttpRequest(weatherUrl, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d("Test","失败");
+                runOnUiThread(()->{
+                    Toast.makeText(ThirdActivity.this,"获取天气失败",Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                });
+                tag.setShowTemperature(false);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String responseString = response.body().string();
+                Weather weather = (Utility.handleWeatherResponse(responseString));
+                tag.setTemperature(weather.now.temperature);
+                tag.setUpdateTime(System.currentTimeMillis());
+                runOnUiThread(()->{
+                    changeFragment(tag.getTemperature());
+                    progressDialog.dismiss();
+                });
+            }
+        });
+
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -142,6 +197,21 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
+            case R.id.button_weather:
+                if(tag.isShowTemperature()==false) {
+                    tag.setShowTemperature(true);
+                    if(System.currentTimeMillis()-tag.getUpdateTime()>300000) {
+                        getWeather();
+                        progressDialog.show();
+                    }   else {
+                        changeFragment(tag.getTemperature());
+                    }
+                }
+                else {
+                    tag.setShowTemperature(false);
+                    changeFragment(null);
+                }
+                break;
             case R.id.button_confirmdelete:
                 mode=-1;
                 finish();
@@ -197,7 +267,6 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
                 });
                 priorityChoodeDialog.setPositiveButton("确定",(dialog,which)->{
                         tag.setPriority(priority);
-                        tag.save();
                         updateAttachment();
                 });
                 priorityChoodeDialog.show();
@@ -226,9 +295,10 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
     protected void onPause() {
         super.onPause();
         String newConten = editText.getText().toString();
+        tag.setContent(newConten);
         if("".equals(newConten)==true) mode=-1;
         else
-        if(tag.getContent().equals(newConten)==false) mode=1;
+        if(tag.getContent().equals(newConten)==false&&mode!=-1) mode=1;
 
         if(mode==-1){
             MainActivity.tagList.get(position).delete();
@@ -236,7 +306,8 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         }
         else
         {
-            if(mode==1) MainActivity.tagList.get(position).setContent(newConten);
+            if(mode==1) MainActivity.tagList.set(position,tag);
         }
     }
+
 }

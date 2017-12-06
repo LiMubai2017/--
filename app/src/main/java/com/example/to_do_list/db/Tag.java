@@ -1,4 +1,4 @@
-package com.example.to_do_list;
+package com.example.to_do_list.db;
 
 import org.litepal.crud.DataSupport;
 
@@ -13,6 +13,9 @@ public class Tag extends DataSupport{
     private   int year_begin,year_end,month_begin,month_end,day_begin,day_end,hour_begin,hour_end,minute_begin,minute_end;
     private boolean isNotified;
     private int priority;
+    private String temperature;
+    private long updateTime;
+    private boolean showTemperature=false;
 
     public void set(int year_begin,int year_end,int month_begin,int month_end,int day_begin,int day_end,int hour_begin,int hour_end,int minute_begin,int minute_end) {
         this.year_begin = year_begin;this.year_end = year_end;this.month_begin = month_begin;this.month_end = month_end;this.minute_end = minute_end;
@@ -27,6 +30,22 @@ public class Tag extends DataSupport{
         month_begin=month_end = calendar.get(Calendar.MONTH);
         day_end=day_begin=calendar.get(Calendar.DAY_OF_MONTH);
         isNotified=false;
+    }
+
+    public boolean isShowTemperature() {
+        return showTemperature;
+    }
+
+    public void setShowTemperature(boolean showTemperature) {
+        this.showTemperature = showTemperature;
+    }
+
+    public long getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(long updateTime) {
+        this.updateTime = updateTime;
     }
 
     public boolean isNotified() {
@@ -91,5 +110,14 @@ public class Tag extends DataSupport{
 
     public int getPriority() {
         return priority;
+    }
+
+
+    public String getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(String temperature) {
+        this.temperature = temperature;
     }
 }

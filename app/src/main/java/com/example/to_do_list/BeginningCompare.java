@@ -1,5 +1,7 @@
 package com.example.to_do_list;
 
+import com.example.to_do_list.db.Tag;
+
 import java.util.Comparator;
 
 /**
