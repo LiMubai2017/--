@@ -1,4 +1,4 @@
-package com.example.to_do_list.db;
+package com.example.to_do_list.model;
 
 /**
  * Created by abc on 2017/12/2.

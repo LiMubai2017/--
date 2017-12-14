@@ -1,4 +1,4 @@
-package com.example.to_do_list;
+package com.example.to_do_list.view;
 
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -10,7 +10,6 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,9 +27,12 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.to_do_list.db.Tag;
-import com.example.to_do_list.db.Weather;
-import com.example.to_do_list.util.Utility;
+import com.example.to_do_list.R;
+import com.example.to_do_list.model.Tag;
+import com.example.to_do_list.model.Weather;
+import com.example.to_do_list.model.Utility;
+import com.example.to_do_list.presenter.EditPresenter;
+import com.example.to_do_list.presenter.MainPresenter;
 import com.suke.widget.SwitchButton;
 
 import java.io.IOException;
@@ -42,28 +44,38 @@ import okhttp3.Response;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
 
-public class ThirdActivity extends AppCompatActivity implements View.OnClickListener{
+public class EditView extends AppCompatActivity implements View.OnClickListener{
 
-    private Tag tag;
-    int position;
     EditText editText;
-    int mode=0;
     TextView beginningTime,beginningDate,endDate,endTime,priority_view;
-    int priority,year_begin,year_end,month_begin,month_end,day_begin,day_end,hour_begin,hour_end,minute_begin,minute_end;
     com.suke.widget.SwitchButton notifyButton;
     AlarmManager alarmManager;
     private Context allContext;
-    Intent notifyIntent ;
-    PendingIntent pendingIntent ;
     String[] priorityChoics={"低","较低","一般","较高","高"};
-    String weatherAddress;
     ProgressDialog progressDialog;
+    EditPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         allContext = getApplicationContext();
+        initPresenter();
+        initRes();
+        initContent(presenter.getTag());
+        initAlarm(presenter.getPosition());
+    }
+
+    public void initPresenter() {
+        presenter = new EditPresenter(this);
+        Intent intent = getIntent();
+        int position = intent.getIntExtra("tagPosition",0);
+        presenter.setPosition(position);
+    }
+
+    public void initRes() {
         setContentView(R.layout.activity_third);
+
+        //View组件获得实例
         editText = findViewById(R.id.edit_text);
         ImageButton button_delete = findViewById(R.id.button_delete);
         notifyButton = findViewById(R.id.notify_button);
@@ -73,28 +85,15 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         endTime=(TextView) findViewById(R.id.endTime_view);
         priority_view=(TextView) findViewById(R.id.priority_view);
         android.support.v7.widget.Toolbar toobal2 = findViewById(R.id.toolbar2);
-        progressDialog = new ProgressDialog(ThirdActivity.this);
-        progressDialog.setTitle("获取当地天气");
-        progressDialog.setMessage("全力加载中");
+
+        //设置标题栏
         setSupportActionBar(toobal2);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        Intent intent = getIntent();
-        position = intent.getIntExtra("tagPosition",0);
-        notifyIntent = new Intent(allContext,NotifyActivity.class);
-        notifyIntent.putExtra("tagPosition",position);
-        pendingIntent = PendingIntent.getActivity(allContext,position,notifyIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-        tag = MainActivity.tagList.get(position);
-        alarmManager = (AlarmManager) allContext.getSystemService(Context.ALARM_SERVICE);
-        priority=tag.getPriority();
-        year_begin=tag.getYear_begin();month_begin=tag.getMonth_begin();day_begin=tag.getDay_begin();
-        hour_begin=tag.getHour_begin();minute_begin=tag.getMinute_begin();
-        year_end=tag.getYear_end();month_end=tag.getMonth_end();day_end=tag.getDay_end();
-        hour_end=tag.getHour_end();minute_end=tag.getMinute_end();
-        editText.setText(tag.getContent());
-        if(tag.isNotified()) notifyButton.setChecked(true);
-        updateAttachment();
-        if(tag.isShowTemperature()) changeFragment(tag.getTemperature());
-        else changeFragment(null);
+
+        //初始化switchButton
+        if(presenter.getTag().isNotified()) notifyButton.setChecked(true);
+
+        //注册监听事件
         beginningTime.setOnClickListener(this);
         beginningDate.setOnClickListener(this);
         endDate.setOnClickListener(this);
@@ -102,44 +101,70 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         priority_view.setOnClickListener(this);
         button_delete.setOnClickListener(this);
         findViewById(R.id.button_weather).setOnClickListener(this);
+
+    }
+
+    public void initContent(Tag tag) {
+        //获得tag实例、设置内容、天气
+
+        editText.setText(tag.getContent());
+        if(tag.isShowTemperature()) changeFragment(tag.getTemperature());
+        else changeFragment(null);
+
+        //初始化progressDialog
+        progressDialog = new ProgressDialog(EditView.this);
+        progressDialog.setTitle("获取当地天气");
+        progressDialog.setMessage("全力加载中");
+
+        //显示优先级、开始、结束时间
+        updateAttachment(presenter.getTag());
+    }
+
+    public void initAlarm(int position) {
+        Intent notifyIntent ;
+        PendingIntent pendingIntent ;
+        notifyIntent = new Intent(allContext,NotifyActivity.class);
+        notifyIntent.putExtra("tagPosition",presenter.getPosition());
+        pendingIntent = PendingIntent.getActivity(allContext,presenter.getPosition(),notifyIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager = (AlarmManager) allContext.getSystemService(Context.ALARM_SERVICE);
         notifyButton.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(SwitchButton view, boolean isChecked) {
-                notifyIntent.putExtra("tagPosition", position);
+                notifyIntent.putExtra("tagPosition",presenter.getPosition());
                 if(isChecked) {
-                    MainActivity.tagList.get(position).setNotified(true);
+                    presenter.setNotified(true);
                     Calendar notifyCalendar = Calendar.getInstance();
-                    notifyCalendar.set(year_begin,month_begin,day_begin,hour_begin,minute_begin);
+                    notifyCalendar.set(presenter.getYear_begin(),presenter.getMonth_begin(),presenter.getDay_begin(),presenter.getHour_begin(),presenter.getMinute_end());
                     if(Build.VERSION.SDK_INT>=19) {
                         alarmManager.setExact(RTC_WAKEUP, notifyCalendar.getTimeInMillis(), pendingIntent);
                     } else {
                         alarmManager.set(RTC_WAKEUP, notifyCalendar.getTimeInMillis(), pendingIntent);
                     }
-                    Toast.makeText(ThirdActivity.this,"将在"+year_begin+"-"+(month_begin+1)+"-"+day_begin+"   "+
-                            hour_begin+":"+minute_begin+"提醒您",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditView.this,"将在"+presenter.getYear_begin()+"-"+(presenter.getMonth_begin()+1)+"-"+presenter.getDay_begin()+"   "+
+                            presenter.getHour_begin()+":"+presenter.getMonth_begin()+"提醒您",Toast.LENGTH_SHORT).show();
                 } else {
-                    MainActivity.tagList.get(position).setNotified(false);
+                    presenter.setNotified(false);
                     alarmManager.cancel(pendingIntent);
-                    Toast.makeText(ThirdActivity.this,"提醒取消",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditView.this,"提醒取消",Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-    public void updateAttachment() {
+    //更新附加信息
+    public void updateAttachment(Tag tag) {
         beginningDate.setText(
-                "开始时间  "+year_begin+"-"+(month_begin+1)+"-"+day_begin
+                "开始时间  "+tag.getYear_begin()+"-"+(tag.getMonth_begin()+1)+"-"+tag.getDay_begin()
         );
-
         beginningTime.setText(
-                "   "+ hour_begin+":"+minute_begin);
-        endDate.setText("结束时间  "+year_end+"-"+(month_end+1)+"-"+day_end);
-        endTime.setText("   "+hour_end+":"+minute_end);
-        priority_view.setText("优先级： "+priorityChoics[priority]);
-        tag.set(year_begin,year_end,month_begin,month_end,day_begin,day_end,hour_begin,hour_end,minute_begin,minute_end);
+                "   "+ tag.getHour_begin()+":"+tag.getMinute_begin());
+        endDate.setText("结束时间  "+tag.getYear_end()+"-"+(tag.getMonth_end()+1)+"-"+tag.getDay_end());
+        endTime.setText("   "+tag.getHour_end()+":"+tag.getMinute_end());
+        priority_view.setText("优先级： "+priorityChoics[tag.getPriority()]);
     }
 
-    private void changeFragment(String temperature) {
+    //改变天气碎片状态,null为隐藏
+    public void changeFragment(String temperature) {
         LinearLayout fragmentLayout = findViewById(R.id.fragment_layout);
         if(temperature == null) {
             if(fragmentLayout.getVisibility()==View.VISIBLE)
@@ -156,33 +181,20 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
         Log.d("test","更新温度");
     }
 
-    private void getWeather(){
-        String weatherUrl = "http://guolin.tech/api/weather?cityid=CN101200102&key=59c732c13e9141a79deec24c07a10a7e";
-        Utility.sendOkHttpRequest(weatherUrl, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d("Test","失败");
-                runOnUiThread(()->{
-                    Toast.makeText(ThirdActivity.this,"获取天气失败",Toast.LENGTH_SHORT).show();
-                    progressDialog.dismiss();
-                });
-                tag.setShowTemperature(false);
-            }
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String responseString = response.body().string();
-                Weather weather = (Utility.handleWeatherResponse(responseString));
-                tag.setTemperature(weather.now.temperature);
-                tag.setUpdateTime(System.currentTimeMillis());
-                runOnUiThread(()->{
-                    changeFragment(tag.getTemperature());
-                    progressDialog.dismiss();
-                });
-            }
-        });
 
+    public void showProgressDialog() {
+        if(!progressDialog.isShowing())
+            progressDialog.show();
     }
 
+    public void hideProgressDialog() {
+        if(progressDialog.isShowing())
+            progressDialog.hide();
+    }
+
+    public void makeToast(String content) {
+        Toast.makeText(this,content,Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -198,76 +210,55 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.button_weather:
-                if(tag.isShowTemperature()==false) {
-                    tag.setShowTemperature(true);
-                    if(System.currentTimeMillis()-tag.getUpdateTime()>300000) {
-                        getWeather();
-                        progressDialog.show();
-                    }   else {
-                        changeFragment(tag.getTemperature());
-                    }
-                }
-                else {
-                    tag.setShowTemperature(false);
-                    changeFragment(null);
-                }
+                presenter.changeWeatherFragmentStatus();
                 break;
             case R.id.button_confirmdelete:
-                mode=-1;
+                presenter.delete();
                 finish();
                 break;
             case R.id.button_delete :
                 showDeleteDialog();
                 break;
             case R.id.beginningTime_view:
-                new TimePickerDialog(ThirdActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                new TimePickerDialog(EditView.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                        hour_begin=i;
-                        minute_begin=i1;
-                        updateAttachment();
+                        presenter.changeTimeBegin(i,i1);
                     }
-                },hour_begin,minute_begin,true).show();
+                },presenter.getHour_begin(),presenter.getMinute_begin(),true).show();
                 break;
             case R.id.beginningDate_view:
-                new DatePickerDialog(ThirdActivity.this, new DatePickerDialog.OnDateSetListener() {
+                new DatePickerDialog(EditView.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        year_begin=i;
-                        month_begin=i1;
-                        day_begin=i2;
+                        presenter.changeDataBegin(i,i1,i2);
                     }
-                },year_begin,month_begin,day_begin).show();
+                },presenter.getYear_begin(),presenter.getMonth_begin(),presenter.getDay_begin()).show();
                 break;
             case R.id.endDate_view:
-                new DatePickerDialog(ThirdActivity.this, new DatePickerDialog.OnDateSetListener() {
+                new DatePickerDialog(EditView.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                        year_end=i;
-                        month_end=i1;
-                        day_end=i2;
+                        presenter.changeDataEnd(i,i1,i2);
                     }
-                },year_end,month_end,day_end).show();
+                },presenter.getYear_end(),presenter.getMonth_end(),presenter.getDay_end()).show();
                 break;
             case R.id.endTime_view:
-                new TimePickerDialog(ThirdActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                new TimePickerDialog(EditView.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                        hour_end=i;
-                        minute_end=i1;
-                        updateAttachment();
+                        presenter.changeTimeEnd(i,i1);
                     }
-                },hour_end,minute_end,true).show();
+                },presenter.getHour_end(),presenter.getMinute_end(),true).show();
                 break;
             case R.id.priority_view:
-                AlertDialog.Builder priorityChoodeDialog = new AlertDialog.Builder(ThirdActivity.this);
+                AlertDialog.Builder priorityChoodeDialog = new AlertDialog.Builder(EditView.this);
                 priorityChoodeDialog.setTitle("标签优先级");
-                priorityChoodeDialog.setSingleChoiceItems(priorityChoics,priority,(dialog,which)->{
-                    if(which!=-1) priority=which;
+                priorityChoodeDialog.setSingleChoiceItems(priorityChoics,presenter.getPriority(),(dialog,which)->{
                 });
                 priorityChoodeDialog.setPositiveButton("确定",(dialog,which)->{
-                        tag.setPriority(priority);
-                        updateAttachment();
+                        if(which!=-1) presenter.setPriority(which);
+                        presenter.refreshAttachment();
                 });
                 priorityChoodeDialog.show();
                 break;
@@ -293,20 +284,19 @@ public class ThirdActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     protected void onPause() {
+        int mode = 0;
         super.onPause();
         String newConten = editText.getText().toString();
-        tag.setContent(newConten);
+        presenter.setContent(newConten);
         if("".equals(newConten)==true) mode=-1;
         else
-        if(tag.getContent().equals(newConten)==false&&mode!=-1) mode=1;
-
+        if((presenter.getContent()).equals(newConten)==false&&mode!=-1) mode=1;
         if(mode==-1){
-            MainActivity.tagList.get(position).delete();
-            MainActivity.tagList.remove(position);
+            presenter.delete();
         }
         else
         {
-            if(mode==1) MainActivity.tagList.set(position,tag);
+            if(mode==1) presenter.save();
         }
     }
 

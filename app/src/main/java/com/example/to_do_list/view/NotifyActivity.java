@@ -1,4 +1,4 @@
-package com.example.to_do_list;
+package com.example.to_do_list.view;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -6,7 +6,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.example.to_do_list.db.Tag;
+import com.example.to_do_list.R;
+import com.example.to_do_list.model.Tag;
+import com.example.to_do_list.presenter.MainPresenter;
 
 public class NotifyActivity extends AppCompatActivity {
 
@@ -16,7 +18,7 @@ public class NotifyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_notify);
         Intent intent = getIntent();
         final int position = intent.getIntExtra("tagPosition",0);
-        final Tag tag = MainActivity.tagList.get(position);
+        final Tag tag = MainPresenter.tagList.get(position);
         tag.setNotified(false);
 
         AlertDialog.Builder normalDialog =
@@ -27,7 +29,7 @@ public class NotifyActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent detailsIntent = new Intent(NotifyActivity.this,ThirdActivity.class);
+                        Intent detailsIntent = new Intent(NotifyActivity.this,EditView.class);
                         detailsIntent.putExtra("tagPosition",position);
                         startActivity(detailsIntent);
                         finish();;
@@ -36,7 +38,7 @@ public class NotifyActivity extends AppCompatActivity {
         normalDialog.setNeutralButton("删除", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                MainActivity.tagList.remove(position);
+                MainPresenter.tagList.remove(position);
                 tag.delete();
                 finish();
             }
@@ -45,7 +47,7 @@ public class NotifyActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        MainActivity.tagList.get(position).setNotified(false);
+                        MainPresenter.tagList.get(position).setNotified(false);
                         finish();
                     }
                 });

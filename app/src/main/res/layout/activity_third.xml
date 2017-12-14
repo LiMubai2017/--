@@ -33,7 +33,7 @@
         android:id="@+id/fragment"
         android:layout_width="match_parent"
         android:layout_height="112dp"
-        android:name="com.example.to_do_list.AttachFragment"
+        android:name="com.example.to_do_list.view.AttachFragment"
         />
     </LinearLayout>
 

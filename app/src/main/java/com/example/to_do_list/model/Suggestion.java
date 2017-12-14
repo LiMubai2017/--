@@ -1,4 +1,4 @@
-package com.example.to_do_list.db;
+package com.example.to_do_list.model;
 
 import com.google.gson.annotations.SerializedName;
 

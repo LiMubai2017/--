@@ -1,17 +1,17 @@
-package com.example.to_do_list;
+package com.example.to_do_list.view;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.to_do_list.db.Weather;
+import com.example.to_do_list.R;
 
 /**
  * Created by abc on 2017/12/3.
+ * 天气碎片
  */
 
 public class AttachFragment extends Fragment {

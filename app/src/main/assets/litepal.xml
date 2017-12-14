@@ -5,6 +5,6 @@
     <version value="12"></version>
 
     <list>
-        <mapping class="com.example.to_do_list.db.Tag"></mapping>
+        <mapping class="com.example.to_do_list.model.Tag"></mapping>
     </list>
 </litepal>

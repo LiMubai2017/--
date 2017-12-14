@@ -1,4 +1,4 @@
-package com.example.to_do_list;
+package com.example.to_do_list.view;
 
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -7,7 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.to_do_list.db.Tag;
+import com.example.to_do_list.R;
+import com.example.to_do_list.model.Tag;
+import com.example.to_do_list.presenter.MainPresenter;
 import com.ms.square.android.expandabletextview.ExpandableTextView;
 
 import java.util.List;
@@ -57,14 +59,14 @@ public class TagAdapter extends RecyclerView.Adapter<TagAdapter.ViewHolder>{
         String[] priority = {"低","较低","一般","较高","高"};
         Tag tag = mTagList.get(position);
         holder.tagContent.setText(tag.getContent());
-        if(MainActivity.rankMode == 1) holder.attachment.setText("Begin: "+tag.getYear_begin()+"-"+(tag.getMonth_begin()+1)+"-"+tag.getDay_begin());
-        if(MainActivity.rankMode == 2) holder.attachment.setText("End: "+tag.getYear_end()+"-"+(tag.getMonth_end()+1)+"-"+tag.getDay_end());
-        if(MainActivity.rankMode == 3) holder.attachment.setText("优先级: "+priority[tag.getPriority()]);
+        if(MainPresenter.rankMode == 1) holder.attachment.setText("Begin: "+tag.getYear_begin()+"-"+(tag.getMonth_begin()+1)+"-"+tag.getDay_begin());
+        if(MainPresenter.rankMode == 2) holder.attachment.setText("End: "+tag.getYear_end()+"-"+(tag.getMonth_end()+1)+"-"+tag.getDay_end());
+        if(MainPresenter.rankMode == 3) holder.attachment.setText("优先级: "+priority[tag.getPriority()]);
 
         holder.tagView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(),ThirdActivity.class);
+                Intent intent = new Intent(view.getContext(),EditView.class);
                 intent.putExtra("tagPosition",position);
                 view.getContext().startActivity(intent);
             }

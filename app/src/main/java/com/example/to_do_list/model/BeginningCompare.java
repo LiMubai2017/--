@@ -1,18 +1,17 @@
-package com.example.to_do_list;
+package com.example.to_do_list.model;
 
-import com.example.to_do_list.db.Tag;
+import com.example.to_do_list.model.Tag;
 
 import java.util.Comparator;
 
 /**
  * Created by abc on 2017/11/22.
+ * 开始时间比较
  */
 
-public class BeginningCompare implements Comparator {
+public class BeginningCompare implements Comparator<Tag> {
     @Override
-    public int compare(Object o, Object t1) {
-        Tag tag1 = (Tag) o;
-        Tag tag2 = (Tag) t1;
+    public int compare(Tag tag1, Tag tag2) {
         if (tag1.getYear_begin() < tag2.getYear_begin())
             return -1;
         else if (tag1.getYear_begin() > tag2.getYear_begin())
