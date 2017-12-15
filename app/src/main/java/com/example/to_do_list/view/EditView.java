@@ -29,47 +29,40 @@ import android.widget.Toast;
 
 import com.example.to_do_list.R;
 import com.example.to_do_list.model.Tag;
-import com.example.to_do_list.model.Weather;
-import com.example.to_do_list.model.Utility;
 import com.example.to_do_list.presenter.EditPresenter;
-import com.example.to_do_list.presenter.MainPresenter;
 import com.suke.widget.SwitchButton;
 
-import java.io.IOException;
 import java.util.Calendar;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
 
 public class EditView extends AppCompatActivity implements View.OnClickListener{
 
-    EditText editText;
-    TextView beginningTime,beginningDate,endDate,endTime,priority_view;
+    private EditText editText;
+    private TextView beginningTime,beginningDate,endDate,endTime,priority_view;
     com.suke.widget.SwitchButton notifyButton;
+
     AlarmManager alarmManager;
     private Context allContext;
-    String[] priorityChoics={"低","较低","一般","较高","高"};
     ProgressDialog progressDialog;
     EditPresenter presenter;
+
+    String[] priorityChoics={"低","较低","一般","较高","高"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         allContext = getApplicationContext();
-        initPresenter();
         initRes();
-        initContent(presenter.getTag());
-        initAlarm(presenter.getPosition());
+        initPresenter();
     }
 
     public void initPresenter() {
         presenter = new EditPresenter(this);
         Intent intent = getIntent();
         int position = intent.getIntExtra("tagPosition",0);
-        presenter.setPosition(position);
+        presenter.init(position);
+        presenter.initView();
     }
 
     public void initRes() {
@@ -89,9 +82,6 @@ public class EditView extends AppCompatActivity implements View.OnClickListener{
         //设置标题栏
         setSupportActionBar(toobal2);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        //初始化switchButton
-        if(presenter.getTag().isNotified()) notifyButton.setChecked(true);
 
         //注册监听事件
         beginningTime.setOnClickListener(this);
@@ -120,13 +110,19 @@ public class EditView extends AppCompatActivity implements View.OnClickListener{
         updateAttachment(presenter.getTag());
     }
 
-    public void initAlarm(int position) {
+    public void initAlarm(int position,boolean isNotified) {
+        //根据Tag提醒状态设置switchButton
+        if(isNotified) notifyButton.setChecked(true);
+
+        //设置闹钟提醒pendingIntent
         Intent notifyIntent ;
         PendingIntent pendingIntent ;
-        notifyIntent = new Intent(allContext,NotifyActivity.class);
+        notifyIntent = new Intent(allContext,NotifyView.class);
         notifyIntent.putExtra("tagPosition",presenter.getPosition());
         pendingIntent = PendingIntent.getActivity(allContext,presenter.getPosition(),notifyIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+
         alarmManager = (AlarmManager) allContext.getSystemService(Context.ALARM_SERVICE);
+
         notifyButton.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(SwitchButton view, boolean isChecked) {
@@ -140,8 +136,8 @@ public class EditView extends AppCompatActivity implements View.OnClickListener{
                     } else {
                         alarmManager.set(RTC_WAKEUP, notifyCalendar.getTimeInMillis(), pendingIntent);
                     }
-                    Toast.makeText(EditView.this,"将在"+presenter.getYear_begin()+"-"+(presenter.getMonth_begin()+1)+"-"+presenter.getDay_begin()+"   "+
-                            presenter.getHour_begin()+":"+presenter.getMonth_begin()+"提醒您",Toast.LENGTH_SHORT).show();
+                    makeToast("将在"+presenter.getYear_begin()+"-"+(presenter.getMonth_begin()+1)+"-"+presenter.getDay_begin()+"   "+
+                            presenter.getHour_begin()+":"+presenter.getMonth_begin()+"提醒您");
                 } else {
                     presenter.setNotified(false);
                     alarmManager.cancel(pendingIntent);

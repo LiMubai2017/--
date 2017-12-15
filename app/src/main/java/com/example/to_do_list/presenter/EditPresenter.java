@@ -31,8 +31,9 @@ public class EditPresenter {
         this.view = view;
     }
 
-    public void init() {
+    public void init(int position) {
         //获得tag实例
+        this.position = position;
         tag = MainPresenter.tagList.get(position);
 
         //初始化优先级、开始、结束时间
@@ -41,7 +42,11 @@ public class EditPresenter {
         hour_begin=tag.getHour_begin();minute_begin=tag.getMinute_begin();
         year_end=tag.getYear_end();month_end=tag.getMonth_end();day_end=tag.getDay_end();
         hour_end=tag.getHour_end();minute_end=tag.getMinute_end();
+    }
 
+    public void initView() {
+        view.initContent(tag);
+        view.initAlarm(position,tag.isNotified());
     }
 
     private void getWeather(){

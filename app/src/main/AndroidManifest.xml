@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.EditView" />
-        <activity android:name=".view.NotifyActivity"></activity>
+        <activity android:name=".view.NotifyView"></activity>
     </application>
 
 </manifest>

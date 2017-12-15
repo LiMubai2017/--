@@ -23,7 +23,7 @@ public class MainPresenter {
     public static final int PRIORITY = 3;
     private MainView view;
     public static List<Tag> tagList;
-    public static int rankMode = PRIORITY;
+    private int rankMode = PRIORITY;
 
     public MainPresenter(MainView view) {
         this.view = view;
@@ -67,4 +67,11 @@ public class MainPresenter {
         view.refresh();
     }
 
+    public int getRankMode() {
+        return rankMode;
+    }
+
+    public void setRankMode(int rankMode) {
+        this.rankMode = rankMode;
+    }
 }

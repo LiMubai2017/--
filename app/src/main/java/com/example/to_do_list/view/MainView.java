@@ -45,7 +45,7 @@ public class MainView extends AppCompatActivity{
         //初始化recyclerView
         initRecyclerView();
         //初始化排序
-        presenter.sort(MainPresenter.rankMode);
+        presenter.sort(presenter.getRankMode());
     }
 
     public void initRecyclerView() {
